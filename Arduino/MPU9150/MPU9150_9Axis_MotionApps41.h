@@ -58,7 +58,7 @@ THE SOFTWARE.
 
         typedef void prog_void;
         typedef char prog_char;
-        typedef unsigned char prog_uchar;
+        typedef unsigned char unsigned char;
         typedef int8_t prog_int8_t;
         typedef uint8_t prog_uint8_t;
         typedef int16_t prog_int16_t;
@@ -121,7 +121,7 @@ THE SOFTWARE.
 // this block of memory gets written to the MPU on start-up, and it seems
 // to be volatile memory, so it has to be done each time (it only takes ~1
 // second though)
-const prog_uchar dmpMemory[MPU9150_DMP_CODE_SIZE] PROGMEM = {
+const unsigned char dmpMemory[MPU9150_DMP_CODE_SIZE] PROGMEM = {
     // bank 0, 256 bytes
     0xFB, 0x00, 0x00, 0x3E, 0x00, 0x0B, 0x00, 0x36, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x00,
     0x00, 0x65, 0x00, 0x54, 0xFF, 0xEF, 0x00, 0x00, 0xFA, 0x80, 0x00, 0x0B, 0x12, 0x82, 0x00, 0x01,
@@ -262,7 +262,7 @@ const prog_uchar dmpMemory[MPU9150_DMP_CODE_SIZE] PROGMEM = {
     0xDC, 0xB9, 0xA7, 0xF1, 0x26, 0x26, 0x26, 0xD8, 0xD8, 0xFF
 };
 
-const prog_uchar dmpConfig[MPU9150_DMP_CONFIG_SIZE] PROGMEM = {
+const unsigned char dmpConfig[MPU9150_DMP_CONFIG_SIZE] PROGMEM = {
 //  BANK    OFFSET  LENGTH  [DATA]
     0x02,   0xEC,   0x04,   0x00, 0x47, 0x7D, 0x1A,   // ?
     0x03,   0x82,   0x03,   0x4C, 0xCD, 0x6C,         // FCFG_1 inv_set_gyro_calibration
@@ -312,7 +312,7 @@ const prog_uchar dmpConfig[MPU9150_DMP_CONFIG_SIZE] PROGMEM = {
     // the FIFO output at the desired rate. Handling FIFO overflow cleanly is also a good idea.
 };
 
-const prog_uchar dmpUpdates[MPU9150_DMP_UPDATES_SIZE] PROGMEM = {
+const unsigned char dmpUpdates[MPU9150_DMP_UPDATES_SIZE] PROGMEM = {
     0x01,   0xB2,   0x02,   0xFF, 0xF5,
     0x01,   0x90,   0x04,   0x0A, 0x0D, 0x97, 0xC0,
     0x00,   0xA3,   0x01,   0x00,
@@ -391,11 +391,11 @@ uint8_t MPU9150::dmpInitialize() {
 
     DEBUG_PRINTLN(F("Setting magnetometer mode to power-down..."));
     //mag -> setMode(0);
-    I2Cdev::writeByte(0x0E, 0x0A, 0x00);
+    I2Cdev::writeByte(MPU9150_RA_MAG_ADDRESS, 0x0A, 0x00);
 
     DEBUG_PRINTLN(F("Setting magnetometer mode to fuse access..."));
     //mag -> setMode(0x0F);
-    I2Cdev::writeByte(0x0E, 0x0A, 0x0F);
+    I2Cdev::writeByte(MPU9150_RA_MAG_ADDRESS, 0x0A, 0x0F);
 
     DEBUG_PRINTLN(F("Reading mag magnetometer factory calibration..."));
     int8_t asax, asay, asaz;
@@ -413,7 +413,7 @@ uint8_t MPU9150::dmpInitialize() {
 
     DEBUG_PRINTLN(F("Setting magnetometer mode to power-down..."));
     //mag -> setMode(0);
-    I2Cdev::writeByte(0x0E, 0x0A, 0x00);
+    I2Cdev::writeByte(MPU9150_RA_MAG_ADDRESS, 0x0A, 0x00);
 
     // load DMP code into memory banks
     DEBUG_PRINT(F("Writing DMP code to MPU memory banks ("));
@@ -515,17 +515,17 @@ uint8_t MPU9150::dmpInitialize() {
 
             DEBUG_PRINTLN(F("Setting AK8975 to single measurement mode..."));
             //mag -> setMode(1);
-            I2Cdev::writeByte(0x0E, 0x0A, 0x01);
+            I2Cdev::writeByte(MPU9150_RA_MAG_ADDRESS, 0x0A, 0x01);
 
             // setup AK8975 (0x0E) as Slave 0 in read mode
             DEBUG_PRINTLN(F("Setting up AK8975 read slave 0..."));
-            I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV0_ADDR, 0x8E);
+            I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV0_ADDR, 0x80 | MPU9150_RA_MAG_ADDRESS);
             I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV0_REG,  0x01);
             I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV0_CTRL, 0xDA);
 
             // setup AK8975 (0x0E) as Slave 2 in write mode
             DEBUG_PRINTLN(F("Setting up AK8975 write slave 2..."));
-            I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV2_ADDR, 0x0E);
+            I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV2_ADDR, 0x00 | MPU9150_RA_MAG_ADDRESS);
             I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV2_REG,  0x0A);
             I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV2_CTRL, 0x81);
             I2Cdev::writeByte(0x68, MPU9150_RA_I2C_SLV2_DO,   0x01);
